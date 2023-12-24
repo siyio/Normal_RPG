@@ -5,18 +5,22 @@ from support import *
 
 
 class Enemy(Entity):
-	def __init__(self, monster_name, pos, groups, obstacle_sprites, damage_player):
+	def __init__(self, monster_name, pos, groups, obstacle_sprites, damage_player, trigger_death_particles):
+
 
 		super().__init__(groups)
 		self.sprite_type = 'enemy'
+
 
 		self.import_graphics(monster_name)
 		self.status = 'idle'
 		self.image = self.animations[self.status][self.frame_index]
 
+
 		self.rect = self.image.get_rect(topleft=pos)
 		self.hitbox = self.rect.inflate(0, -10)
 		self.obstacle_sprites = obstacle_sprites
+
 
 		self.monster_name = monster_name
 		monster_info = monster_data[self.monster_name]
@@ -29,10 +33,13 @@ class Enemy(Entity):
 		self.notice_radius = monster_info['notice_radius']
 		self.attack_type = monster_info['attack_type']
 
+
 		self.can_attack = True
 		self.attack_time = None
 		self.attack_cooldown = 400
 		self.damage_player = damage_player
+		self.trigger_death_particles = trigger_death_particles
+
 
 		self.vulnerable = True
 		self.hit_time = None
@@ -111,7 +118,7 @@ class Enemy(Entity):
 			if attack_type == 'weapon':
 				self.health -= player.get_full_weapon_damage()
 			else:
-				pass
+				self.health -= player.get_full_magic_damage()
 
 			self.hit_time = pygame.time.get_ticks()
 			self.vulnerable = False
@@ -119,6 +126,7 @@ class Enemy(Entity):
 	def check_death(self):
 		if self.health <= 0:
 			self.kill()
+			self.trigger_death_particles(self.rect.center, self.monster_name)
 
 	def hit_reaction(self):
 		if not self.vulnerable:
