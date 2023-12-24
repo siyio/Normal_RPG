@@ -138,6 +138,7 @@ class Level:
 
 		if self.game_paused:
 			self.upgrade.display()
+
 		else:
 			self.visible_sprites.update()
 			self.visible_sprites.enemy_update(self.player)
