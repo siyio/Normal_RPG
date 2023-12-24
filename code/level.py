@@ -88,13 +88,11 @@ class Level:
 									self.add_exp)
 
 	def create_attack(self):
-
 		self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
 
 	def create_magic(self, style, strength, cost):
 		if style == 'heal':
 			self.magic_player.heal(self.player, strength, cost, [self.visible_sprites])
-
 		if style == 'flame':
 			self.magic_player.flame(self.player, cost, [self.visible_sprites, self.attack_sprites])
 
@@ -126,15 +124,12 @@ class Level:
 			self.animation_player.create_particles(attack_type, self.player.rect.center, [self.visible_sprites])
 
 	def trigger_death_particles(self, pos, particle_type):
-
 		self.animation_player.create_particles(particle_type, pos, self.visible_sprites)
 
 	def add_exp(self, amount):
-
 		self.player.exp += amount
 
 	def toggle_menu(self):
-
 		self.game_paused = not self.game_paused
 
 	def run(self):
@@ -156,20 +151,25 @@ class YSortCameraGroup(pygame.sprite.Group):
 		self.half_width = self.display_surface.get_size()[0] // 2
 		self.half_height = self.display_surface.get_size()[1] // 2
 		self.offset = pygame.math.Vector2()
+
 		self.floor_surf = pygame.image.load('../graphics/tilemap/ground.png').convert()
 		self.floor_rect = self.floor_surf.get_rect(topleft=(0, 0))
 
 	def custom_draw(self, player):
+		# # getting the offset
 		self.offset.x = player.rect.centerx - self.half_width
 		self.offset.y = player.rect.centery - self.half_height
-		floor_offset_pos = self.floor_rect.topleft - self.offset
-		self.display_surface.blit(self.floor_surf, floor_offset_pos)
-		for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
-			offset_pos = sprite.rect.topleft - self.offset
-			self.display_surface.blit(sprite.image, offset_pos)
 
-	def enemy_update(self, player):
-		enemy_sprites = [sprite for sprite in self.sprites() if
-		                 hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'enemy']
+		# drawing the floor
+		floor_offset_pos = self.floor_rect.topleft - self.offset
+		self.display_surface.blit(self.floor_surf,floor_offset_pos)
+
+		# for sprite in self.sprites():
+		for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
+			offset_pos = sprite.rect.topleft - self.offset
+			self.display_surface.blit(sprite.image,offset_pos)
+
+	def enemy_update(self,player):
+		enemy_sprites = [sprite for sprite in self.sprites() if hasattr(sprite,'sprite_type') and sprite.sprite_type == 'enemy']
 		for enemy in enemy_sprites:
 			enemy.enemy_update(player)

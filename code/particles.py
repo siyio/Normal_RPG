@@ -6,7 +6,6 @@ from random import choice
 class AnimationPlayer:
 	def __init__(self):
 		self.frames = {
-
 			'flame': import_folder('../graphics/particles/flame/frames'),
 			'aura': import_folder('../graphics/particles/aura'),
 			'heal': import_folder('../graphics/particles/heal/frames'),
@@ -40,7 +39,6 @@ class AnimationPlayer:
 
 	def reflect_images(self, frames):
 		new_frames = []
-
 		for frame in frames:
 			flipped_frame = pygame.transform.flip(frame, True, False)
 			new_frames.append(flipped_frame)
