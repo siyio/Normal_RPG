@@ -2,14 +2,19 @@ import pygame
 from setting import *
 from tile import Tile
 from player import Player
-from support import *
 from debug import debug
+from support import *
+from random import choice
+from weapon import Weapon
+
+
 class Level:
 	def __init__(self):
-		self.player=Player
 		self.display_surface = pygame.display.get_surface()
 		self.visible_sprites = YSortCameraGroup()
 		self.obstacles_sprites = pygame.sprite.Group()
+		self.current_attack = None
+
 		self.create_map()
 	def create_map(self):
 		layout = {
@@ -17,7 +22,10 @@ class Level:
 			'grass': import_csv_layout('../map/map_Grass.csv'),
 			'object':import_csv_layout('../map/map_Objects.csv')
 		}
-		graphics = {'grass': import_folder()}
+		graphics = {
+			'grass': import_folder('../graphics/Grass'),
+			'objects': import_folder('../graphics/objects')
+		}
 		for style, layout in layout.items():
 			for row_index,row in enumerate(layout):
 				for col_index, col in enumerate(row):
@@ -27,20 +35,33 @@ class Level:
 						if style =='boundary':
 							Tile((x,y),[self.obstacles_sprites], 'invisible')
 						if style == 'grass':
-							pass
+							random_grass_image = choice(graphics['grass'])
+							Tile((x, y), [self.visible_sprites, self.obstacles_sprites], 'grass', random_grass_image)
+
 						if style == 'object':
-							pass
+							surf = graphics['objects'][int(col)]
+							Tile((x, y), [self.visible_sprites, self.obstacles_sprites], 'object', surf)
+
 		# 		if col == 'x':
 		# 			Tile((x, y), [self.visible_sprites, self.obstacles_sprites])
 		# 		if col == 'p':
 		# 			self.player = Player((x,y),[self.visible_sprites],self.obstacles_sprites)
-		self.player = Player((400, 300), [self.visible_sprites], self.obstacles_sprites)
+		self.player = Player((2000,1430),[self.visible_sprites],self.obstacles_sprites,self.create_attack,self.destroy_attack)
+
+	def create_attack(self):
+		self.current_attack = Weapon(self.player,[self.visible_sprites])
+
+	def destroy_attack(self):
+		if self.current_attack:
+			self.current_attack.kill()
+		self.current_attack = None
+
 
 	def run(self):
 		self.visible_sprites.custom_draw(self.player)
 		self.visible_sprites.update()
 		# debug(self.player.direction)
-
+		debug(self.player.status)
 class YSortCameraGroup(pygame.sprite.Group):
 	def __init__(self):
 		super().__init__()
@@ -58,6 +79,7 @@ class YSortCameraGroup(pygame.sprite.Group):
 
 		floor_offset_pos = self.floor_rect.topleft - self.offset
 		self.display_surface.blit(self.floor_surface, floor_offset_pos)
+
 		for sprite in sorted(self.sprites(),key=lambda sprite : sprite.rect.centery):
 			offset_pos = sprite.rect.topleft - self.offset
 			self.display_surface.blit(sprite.image, offset_pos)
