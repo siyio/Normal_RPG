@@ -2,7 +2,7 @@
 
 ***用处:~~完成我的Python课程作业~~***
 
-**项目地址:**[github]()
+**项目地址:**[github](https://github.com/siyio/Normal_RPG)
 
 **使用库:**
 
@@ -15,4 +15,3 @@
 安装依赖库,运行src/main.py
 
 **游戏描述:**
-暂无
