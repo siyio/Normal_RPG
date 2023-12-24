@@ -23,6 +23,7 @@ class UI:
 			self.magic_graphics.append(magic)
 
 	def show_bar(self, current, max_amount, bg_rect, color):
+
 		pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
 
 		ratio = current / max_amount
