@@ -10,24 +10,21 @@ from ui import UI
 from enemy import Enemy
 from particles import AnimationPlayer
 from magic import MagicPlayer
+from upgrade import Upgrade
 
 
 class Level:
 	def __init__(self):
-
 		self.display_surface = pygame.display.get_surface()
-
+		self.game_paused = False
 		self.visible_sprites = YSortCameraGroup()
 		self.obstacle_sprites = pygame.sprite.Group()
-
 		self.current_attack = None
 		self.attack_sprites = pygame.sprite.Group()
 		self.attackable_sprites = pygame.sprite.Group()
-
 		self.create_map()
-
 		self.ui = UI()
-
+		self.upgrade = Upgrade(self.player)
 		self.animation_player = AnimationPlayer()
 		self.magic_player = MagicPlayer(self.animation_player)
 
@@ -87,7 +84,8 @@ class Level:
 									[self.visible_sprites, self.attackable_sprites],
 									self.obstacle_sprites,
 									self.damage_player,
-									self.trigger_death_particles)
+									self.trigger_death_particles,
+									self.add_exp)
 
 	def create_attack(self):
 
@@ -131,12 +129,24 @@ class Level:
 
 		self.animation_player.create_particles(particle_type, pos, self.visible_sprites)
 
+	def add_exp(self, amount):
+
+		self.player.exp += amount
+
+	def toggle_menu(self):
+
+		self.game_paused = not self.game_paused
+
 	def run(self):
 		self.visible_sprites.custom_draw(self.player)
-		self.visible_sprites.update()
-		self.visible_sprites.enemy_update(self.player)
-		self.player_attack_logic()
 		self.ui.display(self.player)
+
+		if self.game_paused:
+			self.upgrade.display()
+		else:
+			self.visible_sprites.update()
+			self.visible_sprites.enemy_update(self.player)
+			self.player_attack_logic()
 
 
 class YSortCameraGroup(pygame.sprite.Group):
@@ -146,17 +156,14 @@ class YSortCameraGroup(pygame.sprite.Group):
 		self.half_width = self.display_surface.get_size()[0] // 2
 		self.half_height = self.display_surface.get_size()[1] // 2
 		self.offset = pygame.math.Vector2()
-
 		self.floor_surf = pygame.image.load('../graphics/tilemap/ground.png').convert()
 		self.floor_rect = self.floor_surf.get_rect(topleft=(0, 0))
 
 	def custom_draw(self, player):
 		self.offset.x = player.rect.centerx - self.half_width
 		self.offset.y = player.rect.centery - self.half_height
-
 		floor_offset_pos = self.floor_rect.topleft - self.offset
 		self.display_surface.blit(self.floor_surf, floor_offset_pos)
-
 		for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
 			offset_pos = sprite.rect.topleft - self.offset
 			self.display_surface.blit(sprite.image, offset_pos)
